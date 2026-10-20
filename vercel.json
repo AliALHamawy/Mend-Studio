@@ -1,0 +1,25 @@
+{
+  "version": 2,
+  "buildCommand": "pnpm build",
+  "framework": "nextjs",
+  "functions": {
+    "api/media.ts": {
+      "maxDuration": 60,
+      "memory": 1024
+    },
+    "api/convert.ts": {
+      "maxDuration": 60,
+      "memory": 1024
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/convert/:path*",
+      "destination": "/api/convert"
+    },
+    {
+      "source": "/api/media/:path*",
+      "destination": "/api/media"
+    }
+  ]
+}
