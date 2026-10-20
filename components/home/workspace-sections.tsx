@@ -21,7 +21,7 @@ export function WorkspaceSections() {
       <div className="flex flex-col gap-6">
         {workspaces.map(({ href, eyebrow, title, description, formats, icon: Icon, accent }, index) => (
           <Link key={href} href={href} className="group">
-            <motion.article initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.45, delay: index * 0.06 }} whileHover={{ y: -3 }} className="grid gap-8 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm transition-shadow group-hover:shadow-xl group-hover:shadow-zinc-200/60 sm:p-10 lg:grid-cols-[1fr_0.7fr] lg:items-center">
+            <motion.article initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.45, delay: index * 0.06 }} whileHover={{ y: -3 }} className="grid gap-8 rounded-3xl border border-white/90 bg-white/50 p-6 shadow-[0_20px_50px_rgba(0,0,0,0.08),_0_10px_20px_rgba(0,0,0,0.04),inset_0_1px_2px_rgba(255,255,255,1),_inset_0_-2px_4px_rgba(0,0,0,0.03)] ring-1 ring-inset ring-white/80 backdrop-blur-3xl transition-all duration-300 group-hover:bg-white/60 sm:p-10 lg:grid-cols-[1fr_0.7fr] lg:items-center">
               <div>
                 <span className={`grid size-12 place-items-center rounded-xl ${accent}`}><Icon className="size-6" aria-hidden="true" /></span>
                 <p className="mt-7 text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">{eyebrow}</p>

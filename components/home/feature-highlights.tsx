@@ -19,7 +19,7 @@ export function FeatureHighlights() {
       </div>
       <div className="grid gap-4 md:grid-cols-4">
         {highlights.map(({ title, description, icon: Icon, className }, index) => (
-          <motion.article key={title} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.4, delay: index * 0.06 }} className={`rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm ${className}`}>
+          <motion.article key={title} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.4, delay: index * 0.06 }} className={`rounded-3xl border border-white/90 bg-white/50 p-6 shadow-[0_20px_50px_rgba(0,0,0,0.08),_0_10px_20px_rgba(0,0,0,0.04),inset_0_1px_2px_rgba(255,255,255,1),_inset_0_-2px_4px_rgba(0,0,0,0.03)] ring-1 ring-inset ring-white/80 backdrop-blur-3xl transition-all duration-300 hover:bg-white/60 ${className}`}>
             <Icon className="size-5 text-orange-600" aria-hidden="true" />
             <h3 className="mt-8 text-lg font-semibold tracking-tight text-zinc-900">{title}</h3>
             <p className="mt-2 text-sm leading-6 text-zinc-600">{description}</p>
