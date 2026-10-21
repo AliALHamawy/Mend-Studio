@@ -1,5 +1,5 @@
-import { ServerMediaConverter } from "@/components/shared/server-media-converter";
+import { MediaConverter } from "@/components/shared/media-converter";
 
 export function VideoConverter() {
-  return <ServerMediaConverter kind="video" title="Video workbench" description="Move between MP4, WebM, MKV, MOV, and AVI with FFmpeg." formats={["mp4", "webm", "mkv", "mov", "avi"]} />;
+  return <MediaConverter kind="video" title="Video workbench" description="Move between MP4, WebM, MKV, MOV, and AVI with FFmpeg." formats={["mp4", "webm", "mkv", "mov", "avi"]} />;
 }
