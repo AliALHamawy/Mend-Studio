@@ -1,9 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   typedRoutes: true,
-  turbopack: {
-    root: process.cwd()
-  },
+  // The FFmpeg WASM packages construct their worker with `new URL(<dynamic>, import.meta.url)`,
+  // which Turbopack tries to resolve at build time and fails on. Both `dev` and `build` therefore
+  // run on webpack (see package.json scripts), so no `turbopack` options are configured here.
   async headers() {
     return [
       {

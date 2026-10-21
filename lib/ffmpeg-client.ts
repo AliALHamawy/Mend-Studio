@@ -72,10 +72,17 @@ function encodingArgs(targetFormat: string, quality: number | null) {
   return ["-c:v", "libx264", "-preset", "ultrafast", "-crf", crf, "-c:a", "aac", "-b:a", "128k"];
 }
 
-/** ffmpeg-core release that ships alongside the installed @ffmpeg/ffmpeg build. */
+/**
+ * ffmpeg-core release that ships alongside the installed @ffmpeg/ffmpeg build.
+ *
+ * The ESM builds are required: @ffmpeg/ffmpeg always spawns its worker with `{ type: "module" }`,
+ * where `importScripts` is unavailable, so the worker falls back to `import(coreURL)` and needs a
+ * module with a default export. Everything is fetched from the CDN so no local worker or .wasm
+ * file is ever resolved by the bundler.
+ */
 const CORE_VERSION = "0.12.9";
-const CORE_BASE_URL = `https://unpkg.com/@ffmpeg/core@${CORE_VERSION}/dist/umd`;
-const CORE_MT_BASE_URL = `https://unpkg.com/@ffmpeg/core-mt@${CORE_VERSION}/dist/umd`;
+const CORE_BASE_URL = `https://unpkg.com/@ffmpeg/core@${CORE_VERSION}/dist/esm`;
+const CORE_MT_BASE_URL = `https://unpkg.com/@ffmpeg/core-mt@${CORE_VERSION}/dist/esm`;
 
 let enginePromise: Promise<FFmpeg> | null = null;
 let progressListener: ((percent: number) => void) | null = null;
@@ -161,7 +168,9 @@ export async function convertMediaLocally(
 
     const data = await engine.readFile(outputName) as Uint8Array;
     return {
-      blob: new Blob([data], { type: contentTypeForFormat(extension) }),
+      // readFile hands back a view that may be backed by the WebAssembly heap (ArrayBufferLike), so
+      // copy it into a plain Uint8Array — a valid BlobPart that is detached from that heap.
+      blob: new Blob([new Uint8Array(data)], { type: contentTypeForFormat(extension) }),
       filename: `${file.name.replace(/\.[^/.]+$/, "")}.${extension}`,
     };
   } catch (error) {
