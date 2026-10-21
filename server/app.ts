@@ -1,6 +1,7 @@
 import express from "express";
 import multer from "multer";
-import { convertMediaBuffer } from "./media-conversion";
+import { CONVERSION_FAILED_MESSAGE, INVALID_FILE_MESSAGE } from "@/lib/conversion-messages";
+import { convertMediaBuffer, MediaConversionError } from "./media-conversion";
 
 const app = express();
 const MAX_FILE_SIZE = 50 * 1024 * 1024;
@@ -15,7 +16,7 @@ app.get("/health", (_request, response) => {
 
 const convertMedia = async (request: express.Request, response: express.Response) => {
   if (!request.file) {
-    response.status(400).json({ error: "A media file is required." });
+    response.status(400).json({ error: INVALID_FILE_MESSAGE });
     return;
   }
 
@@ -33,8 +34,14 @@ const convertMedia = async (request: express.Request, response: express.Response
       .setHeader("Content-Length", result.buffer.length)
       .send(result.buffer);
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Media conversion failed.";
-    response.status(message === "Unsupported target format." ? 400 : 422).json({ error: message });
+    // Only friendly messages ever reach the client; anything unexpected is logged here instead.
+    if (!(error instanceof MediaConversionError)) {
+      console.error("[convert] unexpected conversion failure", error);
+    }
+    const invalidInput = error instanceof MediaConversionError && error.kind === "input";
+    response.status(invalidInput ? 400 : 422).json({
+      error: error instanceof MediaConversionError ? error.message : CONVERSION_FAILED_MESSAGE,
+    });
   }
 };
 

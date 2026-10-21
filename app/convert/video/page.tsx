@@ -1,25 +1,32 @@
 import { VideoConverter } from "@/components/video/video-converter";
-import { Footer } from "@/components/shared/footer";
-import { Navbar } from "@/components/shared/navbar";
 import { PageHeader } from "@/components/shared/page-header";
 import type { Metadata } from "next";
 import { CheckCircle2Icon, FilmIcon, ShieldCheckIcon } from "lucide-react";
+import { buildPageMetadata } from "@/lib/page-metadata";
 
 export function generateMetadata(): Metadata {
-  return {
-    title: "Video Converter | Mend Studio",
-    description: "Convert MP4, WebM, MKV, MOV, and AVI video files with a focused FFmpeg-powered workflow.",
-  };
+  return buildPageMetadata({
+    title: "Video Converter",
+    description:
+      "Convert MP4, WebM, MKV, MOV, and AVI video privately. Fast, secure FFmpeg video conversion for sharing, editing, and archiving.",
+    path: "/convert/video",
+    keywords: [
+      "video converter",
+      "convert MP4 WebM MKV",
+      "private video conversion",
+      "FFmpeg video converter",
+      "secure local media converter",
+    ],
+  });
 }
 
 export default function VideoConvertPage() {
   return (
-    <main className="relative isolate min-h-screen overflow-x-clip bg-[#fafafa] text-zinc-900">
+    <div className="relative isolate flex-1 overflow-x-clip bg-[#fafafa] text-zinc-900">
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden" aria-hidden="true">
         <div className="absolute left-1/2 top-1/4 size-[32rem] -translate-x-1/2 rounded-full bg-gradient-to-tr from-emerald-500/15 via-teal-500/10 to-cyan-500/5 blur-3xl" />
         <div className="absolute bottom-1/4 left-1/4 size-[28rem] rounded-full bg-gradient-to-br from-teal-400/15 via-cyan-200/20 to-transparent blur-3xl" />
       </div>
-      <Navbar />
       <div className="mx-auto flex max-w-7xl flex-col gap-8 px-4 pb-8 pt-28 sm:gap-12 sm:px-6 lg:px-10 lg:py-32">
         <PageHeader eyebrow="Video bench" title="Make the footage playable." description="Convert video for editing, sharing, archiving, or the next screen using the FFmpeg backend." />
         <section className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_240px]">
@@ -32,8 +39,7 @@ export default function VideoConvertPage() {
             <div className="mt-auto flex items-center gap-2 rounded-full bg-white/60 px-3 py-2 text-xs text-zinc-600"><ShieldCheckIcon className="size-4 text-emerald-600" /> FFmpeg secured workflow</div>
           </aside>
         </section>
-        <Footer />
       </div>
-    </main>
+    </div>
   );
 }

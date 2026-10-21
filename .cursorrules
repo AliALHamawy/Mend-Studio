@@ -1,0 +1,31 @@
+# Project Context: Mend Studio
+
+## 1. Project Overview
+- **Name**: Mend Studio
+- **Description**: A modern, fast, local-first media conversion web application built with Next.js. It handles image conversion (client-side) and audio/video conversion (server-side via FFmpeg).
+- **Core Philosophy**: Privacy-focused ("Local-first & Private"), sleek UI, minimal friction.
+
+## 2. Tech Stack & Architecture
+- **Framework**: Next.js 14/15 (App Router)
+- **Language**: TypeScript, JavaScript
+- **Styling**: Tailwind CSS, shadcn/ui components, Framer Motion for animations.
+- **Design System**: "Neo-Glass" aesthetic with dynamic, color-coded ambient themes:
+  - **Amber / Orange**: Image conversion
+  - **Emerald / Teal**: Video conversion
+  - **Crimson / Rose**: Audio conversion
+- **Backend / Media Processing**: 
+  - Uses `ffmpeg-static` and system-level `FFMPEG_PATH` (e.g., `C:\tools\ffmpeg.exe` on Windows).
+  - Core conversion pipeline is located at `server/media-conversion.ts`, utilizing Node.js `child_process.spawn` with safety checks (`windowsHide`, robust error handling for `EFTYPE`, `ENOENT`, `EACCES`).
+
+## 3. Current Project Structure & Status
+- **Images**: Fully functional client-side conversion/compression workbench.
+- **Audio & Video**: Fully functional server-side pipeline via `/api/convert` and `server/media-conversion.ts`.
+- **Pending / Immediate Tasks to Implement**:
+  1. **Privacy Policy & Terms and Conditions Pages**: Create static pages at `app/privacy/page.tsx` and `app/terms/page.tsx` styled in Neo-Glass, emphasizing local-first privacy.
+  2. **SEO Optimization**: Add robust metadata, OpenGraph tags, and JSON-LD structured data in `app/layout.tsx` and converter pages.
+  3. **Mobile Navigation Menu (Drawer/Mega Menu)**: Fix the mobile header in `components/Navbar.tsx` to include a responsive slide-out drawer with links to Images, Audio, Video, Privacy, and Terms.
+
+## 4. Coding Guidelines for AI
+- Write clean, modular TypeScript code with proper type definitions.
+- Maintain the Neo-Glass aesthetic (glassmorphism, clean borders, smooth transitions).
+- Avoid unnecessary external dependencies; use built-in Node.js / React features where possible.

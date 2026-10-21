@@ -1,14 +1,21 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { CheckIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export type FormatAccent = "amber" | "emerald" | "crimson";
 
-const accents: Record<FormatAccent, { active: string; glow: string }> = {
-  amber: { active: "border-amber-400 bg-amber-400 text-zinc-950", glow: "hover:border-amber-300 hover:text-amber-700" },
-  emerald: { active: "border-emerald-500 bg-emerald-500 text-white", glow: "hover:border-emerald-300 hover:text-emerald-700" },
-  crimson: { active: "border-rose-500 bg-rose-500 text-white", glow: "hover:border-rose-300 hover:text-rose-700" },
+// Only the selected option is allowed to render an accent border/fill.
+// Every chip is a direct sibling with no shared or positional state, and hover
+// is a surface-only change (background + text) applied by `hover:` on the
+// hovered element itself — no hover rule can introduce a border, a ring or an
+// accent color on any chip, so hovering one option can never restyle another.
+const idleClasses = "border-transparent bg-white/55 text-zinc-600 hover:bg-white/85 hover:text-zinc-900";
+
+const accents: Record<FormatAccent, { active: string }> = {
+  amber: { active: "border-amber-400 bg-amber-400 text-zinc-950 ring-2 ring-amber-400/35 shadow-[0_8px_18px_rgba(0,0,0,0.12)]" },
+  emerald: { active: "border-emerald-500 bg-emerald-500 text-white ring-2 ring-emerald-500/35 shadow-[0_8px_18px_rgba(0,0,0,0.12)]" },
+  crimson: { active: "border-rose-500 bg-rose-500 text-white ring-2 ring-rose-500/35 shadow-[0_8px_18px_rgba(0,0,0,0.12)]" },
 };
 
 export function FormatSelector({ value, formats, labels, accent = "amber", onChange }: { value: string; formats: string[]; labels?: string[]; accent?: FormatAccent; onChange: (value: string) => void }) {
@@ -19,18 +26,20 @@ export function FormatSelector({ value, formats, labels, accent = "amber", onCha
       {formats.map((format, index) => {
         const active = value === format;
         return (
-          <motion.button
+          <button
             key={format}
             type="button"
-            whileHover={{ y: -1 }}
-            whileTap={{ scale: 0.96 }}
             onClick={() => onChange(format)}
-            className={`inline-flex min-h-9 flex-1 items-center justify-center gap-1.5 rounded-xl border px-3 text-xs font-bold tracking-wide transition-all duration-200 max-md:flex-none ${active ? `${tone.active} shadow-[0_8px_18px_rgba(0,0,0,0.12)]` : `border-transparent bg-white/55 text-zinc-600 ${tone.glow}`}`}
             aria-pressed={active}
+            data-state={active ? "active" : "idle"}
+            className={cn(
+              "inline-flex min-h-9 flex-1 items-center justify-center gap-1.5 rounded-xl border px-3 text-xs font-bold tracking-wide transition-colors duration-200 motion-safe:active:scale-95 max-md:flex-none",
+              active ? tone.active : idleClasses
+            )}
           >
             {active && <CheckIcon className="size-3.5" aria-hidden="true" />}
             {labels?.[index] ?? format.toUpperCase()}
-          </motion.button>
+          </button>
         );
       })}
     </div>

@@ -1,13 +1,17 @@
 "use client";
 
-import { useState } from "react";
-import { ArrowRightIcon, LoaderCircleIcon } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ArrowRightIcon, DownloadIcon, LoaderCircleIcon } from "lucide-react";
+import { CONVERSION_FAILED_MESSAGE } from "@/lib/conversion-messages";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { DragDropZone } from "@/components/converter/drag-drop-zone";
 import { FormatSelector } from "@/components/converter/format-selector";
 import { ConversionStatus } from "@/components/converter/conversion-status";
 import { QualityControl } from "@/components/converter/quality-control";
+
+const formatSize = (bytes: number) =>
+  bytes < 1024 ? `${bytes} B` : `${(bytes / 1024 / 1024).toFixed(2)} MB`;
 
 export function ServerMediaConverter({ kind, title, description, formats }: { kind: "audio" | "video"; title: string; description: string; formats: string[] }) {
   const accent: "crimson" | "emerald" = kind === "audio" ? "crimson" : "emerald";
@@ -16,11 +20,22 @@ export function ServerMediaConverter({ kind, title, description, formats }: { ki
   const [quality, setQuality] = useState(kind === "audio" ? 192 : 2);
   const [working, setWorking] = useState(false);
   const [error, setError] = useState("");
+  const [download, setDownload] = useState<{ url: string; name: string; bytes: number } | null>(null);
+
+  useEffect(() => () => {
+    if (download?.url) URL.revokeObjectURL(download.url);
+  }, [download]);
+
+  function revokeDownload() {
+    if (download?.url) URL.revokeObjectURL(download.url);
+  }
 
   async function convert() {
     if (!file) return;
     setWorking(true);
     setError("");
+    revokeDownload();
+    setDownload(null);
     try {
       const body = new FormData();
       body.append("file", file);
@@ -28,18 +43,24 @@ export function ServerMediaConverter({ kind, title, description, formats }: { ki
       body.append("quality", String(quality));
       const response = await fetch("/api/convert", { method: "POST", body });
       if (!response.ok) {
+        // The API only ever returns friendly text; the status/details stay in the console.
         const payload = await response.json().catch(() => null);
-        throw new Error(payload?.error ?? "The server could not convert this file.");
+        console.error("[convert] server rejected the request", response.status, payload);
+        setError(typeof payload?.error === "string" && payload.error ? payload.error : CONVERSION_FAILED_MESSAGE);
+        return;
       }
       const blob = await response.blob();
+      const disposition = response.headers.get("content-disposition") ?? "";
+      const name = disposition.match(/filename="([^"]+)"/)?.[1] ?? `${file.name.replace(/\.[^/.]+$/, "")}.${target}`;
       const url = URL.createObjectURL(blob);
+      setDownload({ url, name, bytes: blob.size });
       const link = document.createElement("a");
       link.href = url;
-      link.download = `${file.name.replace(/\.[^/.]+$/, "")}.${target}`;
+      link.download = name;
       link.click();
-      URL.revokeObjectURL(url);
-    } catch (conversionError) {
-      setError(conversionError instanceof Error ? conversionError.message : "Conversion failed.");
+    } catch (requestError) {
+      console.error("[convert] request failed", requestError);
+      setError(CONVERSION_FAILED_MESSAGE);
     } finally {
       setWorking(false);
     }
@@ -47,7 +68,12 @@ export function ServerMediaConverter({ kind, title, description, formats }: { ki
 
   function acceptFile(next?: File) {
     if (!next) return;
-    if (next.size > 50 * 1024 * 1024) { setError("Files must be 50 MB or smaller."); return; }
+    if (next.size > 50 * 1024 * 1024) {
+      setError("Files must be 50 MB or smaller.");
+      return;
+    }
+    revokeDownload();
+    setDownload(null);
     setFile(next);
     setError("");
   }
@@ -63,7 +89,7 @@ export function ServerMediaConverter({ kind, title, description, formats }: { ki
         <DragDropZone accept={`${kind}/*`} onFile={acceptFile} accent={accent}>
           <div className="text-center">
             <strong className="block text-sm text-foreground">{file?.name ?? `Drop a ${kind} file here`}</strong>
-            <p className="mt-2 text-xs text-muted-foreground">Processed securely through FFmpeg</p>
+            <p className="mt-2 text-xs text-muted-foreground">Up to 50 MB · processed securely through FFmpeg</p>
           </div>
         </DragDropZone>
         <div className="flex flex-col gap-4">
@@ -88,7 +114,21 @@ export function ServerMediaConverter({ kind, title, description, formats }: { ki
         >
           {working ? <><LoaderCircleIcon className="animate-spin" aria-hidden="true" /> Converting…</> : <>Convert &amp; download <ArrowRightIcon aria-hidden="true" /></>}
         </Button>
-        <ConversionStatus error={error} working={working} />
+        <ConversionStatus
+          error={error}
+          working={working}
+          output={download ? `Converted to ${download.name} · ${formatSize(download.bytes)}` : undefined}
+        />
+        {download && (
+          <a
+            href={download.url}
+            download={download.name}
+            className={`inline-flex items-center justify-center gap-2 text-sm font-medium hover:underline ${kind === "audio" ? "text-rose-800" : "text-emerald-800"}`}
+          >
+            <DownloadIcon className="size-4" aria-hidden="true" />
+            Download again
+          </a>
+        )}
       </CardContent>
     </Card>
   );

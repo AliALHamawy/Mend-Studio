@@ -10,6 +10,8 @@ export function Footer() {
         <Link href={"/convert/image" as Route} className="transition-colors hover:text-zinc-950">Images</Link>
         <Link href={"/convert/audio" as Route} className="transition-colors hover:text-zinc-950">Audio</Link>
         <Link href={"/convert/video" as Route} className="transition-colors hover:text-zinc-950">Video</Link>
+        <Link href={"/privacy" as Route} className="transition-colors hover:text-zinc-950">Privacy</Link>
+        <Link href={"/terms" as Route} className="transition-colors hover:text-zinc-950">Terms</Link>
         <span className="text-zinc-400">Private by default</span>
       </nav>
     </footer>

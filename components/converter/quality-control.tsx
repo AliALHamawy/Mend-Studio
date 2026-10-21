@@ -1,6 +1,5 @@
 "use client";
-
-import { motion } from "framer-motion";
+ 
 import { GaugeIcon } from "lucide-react";
 
 export type QualityAccent = "amber" | "emerald" | "crimson";
@@ -42,14 +41,12 @@ export function QualityControl({
           <GaugeIcon className="size-4" aria-hidden="true" />
           {label}
         </label>
-        <motion.output
+        <output
           key={valueLabel}
-          initial={{ opacity: 0, y: -3 }}
-          animate={{ opacity: 1, y: 0 }}
-          className={`rounded-full bg-white/70 px-3 py-1 text-xs font-bold ${tone.text}`}
+          className={`rounded-full bg-white/70 px-3 py-1 text-xs font-bold motion-safe:animate-pop-in ${tone.text}`}
         >
           {valueLabel}
-        </motion.output>
+        </output>
       </div>
       <div className="mt-4 flex items-center gap-3">
         <input
