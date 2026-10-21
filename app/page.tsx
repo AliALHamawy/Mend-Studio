@@ -2,6 +2,37 @@ import { Footer } from "@/components/shared/footer";
 import { Navbar } from "@/components/shared/navbar";
 import { MotionPage } from "@/components/shared/motion-page";
 import { ImmersiveHome } from "@/components/home/immersive-home";
+import type { Metadata } from "next";
+import { buildPageMetadata } from "@/lib/page-metadata";
+import { siteConfig } from "@/lib/site-config";
+
+const homeMetadata = buildPageMetadata({
+  title: "Secure Local Media Converter",
+  description: siteConfig.defaultDescription,
+  path: "/",
+  keywords: [
+    "secure local media converter",
+    "convert video audio image privately",
+    "private media conversion online",
+    "Mend Studio",
+    "local-first converter",
+  ],
+});
+
+export const metadata: Metadata = {
+  ...homeMetadata,
+  title: { absolute: siteConfig.defaultTitle },
+  openGraph: {
+    ...homeMetadata.openGraph,
+    title: siteConfig.defaultTitle,
+    description: siteConfig.defaultDescription,
+  },
+  twitter: {
+    ...homeMetadata.twitter,
+    title: siteConfig.defaultTitle,
+    description: siteConfig.defaultDescription,
+  },
+};
 
 export default function Home() {
   return (
