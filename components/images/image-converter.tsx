@@ -5,10 +5,10 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ArrowRightIcon, CheckCircle2Icon, DownloadIcon, FileImageIcon, HardDriveIcon, ImageIcon, LoaderCircleIcon, LockKeyholeIcon, SlidersHorizontalIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Slider } from "@/components/ui/slider";
 import { DragDropZone } from "@/components/converter/drag-drop-zone";
 import { ConversionStatus } from "@/components/converter/conversion-status";
+import { FormatSelector } from "@/components/converter/format-selector";
+import { QualityControl } from "@/components/converter/quality-control";
 
 type ImageFormat = "image/jpeg" | "image/png" | "image/webp" | "image/avif";
 const formats = [
@@ -78,15 +78,15 @@ export function ImageConverter() {
   }
 
   return (
-    <Card className="overflow-hidden border-zinc-200 bg-white shadow-xl shadow-zinc-200/50 backdrop-blur-xl">
-      <CardContent className="p-4 sm:p-7">
+    <Card className="!p-8 max-md:!p-4">
+      <CardContent className="!p-0">
         <AnimatePresence mode="wait">
           {!file ? (
             <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col gap-5">
               <DragDropZone accept="image/*" onFile={acceptFile}>
                 <div>
                   <p className="text-lg font-semibold text-zinc-900">Drop your image here</p>
-                  <p className="mt-2 text-sm text-zinc-500">or click to browse · JPG, PNG, WebP, or AVIF · up to 50 MB</p>
+                  <p className="mt-2 text-sm text-zinc-500">JPG, PNG, WebP, or AVIF · up to 50 MB</p>
                 </div>
               </DragDropZone>
               <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-zinc-500">
@@ -96,8 +96,8 @@ export function ImageConverter() {
             </motion.div>
           ) : (
             <motion.div key="selected" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-6">
-              <div className="flex items-center gap-4 rounded-2xl border border-zinc-200 bg-zinc-50 p-3">
-                <div className="size-20 shrink-0 overflow-hidden rounded-xl bg-zinc-200">
+              <div className="flex items-center gap-3 rounded-2xl border border-white/90 bg-white/50 p-3 shadow-[inset_0_1px_2px_rgba(255,255,255,1)] ring-1 ring-inset ring-white/80 backdrop-blur-3xl sm:gap-4">
+                <div className="size-16 shrink-0 overflow-hidden rounded-xl bg-zinc-200 sm:size-20">
                   {preview ? <img src={preview} alt={`Preview of ${file.name}`} className="size-full object-cover" /> : <ImageIcon className="m-6 size-8 text-slate-400" />}
                 </div>
                 <div className="min-w-0 flex-1">
@@ -106,19 +106,13 @@ export function ImageConverter() {
                 </div>
                 <CheckCircle2Icon className="size-5 shrink-0 text-emerald-500" />
               </div>
-              <div className="grid gap-6 rounded-2xl border border-zinc-200 p-5 md:grid-cols-[180px_1fr]">
+              <div className="grid gap-6 rounded-2xl border border-white/90 bg-white/35 p-4 shadow-[inset_0_1px_2px_rgba(255,255,255,1)] ring-1 ring-inset ring-white/80 backdrop-blur-3xl sm:p-5">
                 <label className="flex flex-col gap-2 text-sm font-medium text-zinc-700"><span>Convert to</span>
-                  <Select value={target} onValueChange={(value) => { if (value) setTarget(value as ImageFormat); }}>
-                    <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
-                    <SelectContent>{formats.map((format) => <SelectItem key={format.value} value={format.value}>{format.label}</SelectItem>)}</SelectContent>
-                  </Select>
+                  <FormatSelector value={target} formats={formats.map((format) => format.value)} labels={formats.map((format) => format.label)} accent="amber" onChange={(value) => setTarget(value as ImageFormat)} />
                 </label>
-                <label className="flex flex-col gap-3 text-sm font-medium text-zinc-700"><span className="flex justify-between">Smart compression <output className="font-semibold text-primary">{Math.round(quality * 100)}%</output></span>
-                  <Slider min={0.35} max={1} step={0.01} value={[quality]} onValueChange={(values) => setQuality(Array.isArray(values) ? values[0] ?? quality : values)} />
-                  <span className="text-xs font-normal text-slate-500">Higher quality keeps more detail and creates a larger file.</span>
-                </label>
+                <QualityControl label="Smart compression" value={quality} min={0.1} max={1} step={0.01} valueLabel={`${Math.round(quality * 100)}%`} hint="Higher quality keeps more detail and creates a larger file." accent="amber" onChange={setQuality} />
               </div>
-              <Button onClick={convert} disabled={working} size="lg" className="h-12 w-full rounded-xl text-base font-semibold">
+              <Button onClick={convert} disabled={working} className="mt-2 h-auto w-full border border-white/20 bg-zinc-900 px-6 py-3.5 text-base font-medium shadow-[0_10px_25px_-5px_rgba(24,24,27,0.3)] transition-all duration-300 hover:bg-zinc-800 active:scale-[0.99]">
                 {working ? <><LoaderCircleIcon className="animate-spin" /> Converting your image…</> : <>Convert File Now <ArrowRightIcon /></>}
               </Button>
               {working && <motion.div initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ duration: 1.2 }} className="h-1 origin-left rounded-full bg-primary" />}

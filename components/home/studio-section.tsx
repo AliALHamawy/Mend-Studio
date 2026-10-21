@@ -113,7 +113,7 @@ export function StudioSection({ kind, sectionId = kind }: { kind: StudioKind; se
           <p className="mt-8 text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">{studio.eyebrow}</p>
           <h2 className="mt-4 max-w-3xl text-4xl font-bold leading-tight tracking-tight text-zinc-900 sm:text-5xl">{studio.title}</h2>
           <p className="mt-5 max-w-xl text-base leading-7 text-zinc-600">{studio.description}</p>
-          <Link href={studio.href} className="relative mt-7 inline-flex h-11 items-center gap-2 overflow-hidden rounded-full border border-white/20 bg-zinc-900/85 px-6 py-2.5 text-sm font-medium text-white shadow-[0_20px_50px_rgba(0,0,0,0.08),_0_10px_20px_rgba(0,0,0,0.04),inset_0_1px_1px_rgba(255,255,255,0.4)] backdrop-blur-xl transition-all duration-300 hover:scale-[1.02] hover:bg-zinc-900 active:scale-95">
+          <Link href={studio.href as Route} className="relative mt-7 inline-flex h-11 items-center gap-2 overflow-hidden rounded-full border border-white/20 bg-zinc-900/85 px-6 py-2.5 text-sm font-medium text-white shadow-[0_20px_50px_rgba(0,0,0,0.08),_0_10px_20px_rgba(0,0,0,0.04),inset_0_1px_1px_rgba(255,255,255,0.4)] backdrop-blur-xl transition-all duration-300 hover:scale-[1.02] hover:bg-zinc-900 active:scale-95">
             <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent" />
             Open {studio.eyebrow.toLowerCase()} <ArrowRightIcon className="size-4" aria-hidden="true" />
           </Link>
@@ -211,7 +211,7 @@ export function StudioShowcase({ onActiveChange }: { onActiveChange?: (kind: Stu
                 <p className="mt-8 text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">{studio.eyebrow}</p>
                 <h2 className="mt-4 max-w-xl text-4xl font-bold leading-tight tracking-tight text-zinc-900 sm:text-5xl">{studio.title}</h2>
                 <p className="mt-5 max-w-xl text-base leading-7 text-zinc-600">{studio.description}</p>
-                <Link href={studio.href} className="relative mt-7 inline-flex h-11 items-center gap-2 overflow-hidden rounded-full border border-white/20 bg-zinc-900/85 px-6 py-2.5 text-sm font-medium text-white shadow-[0_20px_50px_rgba(0,0,0,0.08),_0_10px_20px_rgba(0,0,0,0.04),inset_0_1px_1px_rgba(255,255,255,0.4)] backdrop-blur-xl transition-all duration-300 hover:scale-[1.02] hover:bg-zinc-900 active:scale-95">
+                <Link href={studio.href as Route} className="relative mt-7 inline-flex h-11 items-center gap-2 overflow-hidden rounded-full border border-white/20 bg-zinc-900/85 px-6 py-2.5 text-sm font-medium text-white shadow-[0_20px_50px_rgba(0,0,0,0.08),_0_10px_20px_rgba(0,0,0,0.04),inset_0_1px_1px_rgba(255,255,255,0.4)] backdrop-blur-xl transition-all duration-300 hover:scale-[1.02] hover:bg-zinc-900 active:scale-95">
                   <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent" />
                   Open {studio.eyebrow.toLowerCase()} <ArrowRightIcon className="size-4" aria-hidden="true" />
                 </Link>

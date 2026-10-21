@@ -31,7 +31,7 @@ export function HeroSection() {
             <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent" />
             Start converting <ArrowRightIcon className="size-4" aria-hidden="true" />
           </Link>
-          <Link href="#workspaces" className="inline-flex h-11 w-full items-center justify-center rounded-full border border-white/90 bg-white/50 px-4 text-sm font-semibold text-zinc-900 shadow-[0_20px_50px_rgba(0,0,0,0.08),_0_10px_20px_rgba(0,0,0,0.04)] ring-1 ring-inset ring-white/80 backdrop-blur-3xl transition-all duration-300 hover:bg-white/60 sm:w-auto sm:px-5">
+          <Link href={"#workspaces" as Route} className="inline-flex h-11 w-full items-center justify-center rounded-full border border-white/90 bg-white/50 px-4 text-sm font-semibold text-zinc-900 shadow-[0_20px_50px_rgba(0,0,0,0.08),_0_10px_20px_rgba(0,0,0,0.04)] ring-1 ring-inset ring-white/80 backdrop-blur-3xl transition-all duration-300 hover:bg-white/60 sm:w-auto sm:px-5">
             Explore workspaces
           </Link>
         </motion.div>
