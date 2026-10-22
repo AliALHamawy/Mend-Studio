@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { ArrowRightIcon, DownloadIcon, LoaderCircleIcon } from "lucide-react";
-import { CONVERSION_FAILED_MESSAGE } from "@/lib/conversion-messages";
+import { CONVERSION_FAILED_MESSAGE, FILE_TOO_LARGE_MESSAGE } from "@/lib/conversion-messages";
 import { convertMediaLocally, MediaConversionError } from "@/lib/ffmpeg-client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,6 +13,14 @@ import { QualityControl } from "@/components/converter/quality-control";
 
 const formatSize = (bytes: number) =>
     bytes < 1024 ? `${bytes} B` : `${(bytes / 1024 / 1024).toFixed(2)} MB`;
+
+/**
+ * In-browser encoding holds the whole file in memory alongside the WebAssembly heap, so inputs are
+ * capped below the size where browsers start swapping or killing the worker. Anything bigger should
+ * be trimmed before it reaches the encoder instead of freezing the tab.
+ */
+const MAX_INPUT_MB = 50;
+const MAX_INPUT_BYTES = MAX_INPUT_MB * 1024 * 1024;
 
 export function MediaConverter({ kind, title, description, formats }: { kind: "audio" | "video"; title: string; description: string; formats: string[] }) {
     const accent: "crimson" | "emerald" = kind === "audio" ? "crimson" : "emerald";
@@ -64,8 +72,13 @@ export function MediaConverter({ kind, title, description, formats }: { kind: "a
 
     function acceptFile(next?: File) {
         if (!next) return;
-        if (next.size > 50 * 1024 * 1024) {
-            setError("Files must be 50 MB or smaller.");
+        if (next.size > MAX_INPUT_BYTES) {
+            // Reject before anything reaches the encoder, and clear the selection so the error is
+            // never shown next to a convert button that still points at an earlier file.
+            revokeDownload();
+            setDownload(null);
+            setFile(null);
+            setError(FILE_TOO_LARGE_MESSAGE);
             return;
         }
         revokeDownload();
@@ -85,7 +98,7 @@ export function MediaConverter({ kind, title, description, formats }: { kind: "a
                 <DragDropZone accept={`${kind}/*`} onFile={acceptFile} accent={accent}>
                     <div className="text-center">
                         <strong className="block text-sm text-foreground">{file?.name ?? `Drop a ${kind} file here`}</strong>
-                        <p className="mt-2 text-xs text-muted-foreground">Up to 50 MB · converted locally in your browser</p>
+                        <p className="mt-2 text-xs text-muted-foreground">Up to {MAX_INPUT_MB} MB · converted locally in your browser</p>
                     </div>
                 </DragDropZone>
                 <div className="flex flex-col gap-4">
