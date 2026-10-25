@@ -102,4 +102,7 @@ export const rootMetadata: Metadata = {
       "max-snippet": -1,
     },
   },
+  verification: {
+    google: "yguX-gtZmVQQVDdHjvByusOifCxVgIBqWeyHLpmKWLQ",
+  },
 };

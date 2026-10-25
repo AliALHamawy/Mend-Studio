@@ -6,6 +6,7 @@ import { RootStructuredData } from "@/components/seo/structured-data";
 import { Footer } from "@/components/shared/footer";
 import { Navbar } from "@/components/shared/navbar";
 import { rootMetadata } from "@/lib/page-metadata";
+import { Analytics } from "@vercel/analytics/next";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -30,6 +31,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <div className="mx-auto w-full max-w-7xl px-6">
           <Footer />
         </div>
+        <Analytics />
       </body>
     </html>
   );

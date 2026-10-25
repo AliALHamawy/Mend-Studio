@@ -1,4 +1,4 @@
-const DEFAULT_SITE_URL = "https://mendstudio.app";
+const DEFAULT_SITE_URL = "https://mendstudio.vercel.app";
 
 /** Canonical origin for metadata, sitemap, and JSON-LD (no trailing slash). */
 export function getSiteUrl(): string {
@@ -6,7 +6,9 @@ export function getSiteUrl(): string {
   if (fromEnv) {
     return fromEnv.replace(/\/+$/, "");
   }
-  const vercel = process.env.VERCEL_URL?.trim();
+  // VERCEL_URL identifies one immutable deployment (`<project>-<hash>.vercel.app`), which would put
+  // a different origin in every page's canonical tag. The production URL is the stable one.
+  const vercel = (process.env.VERCEL_PROJECT_PRODUCTION_URL ?? process.env.VERCEL_URL)?.trim();
   if (vercel) {
     return `https://${vercel.replace(/^https?:\/\//, "").replace(/\/+$/, "")}`;
   }
