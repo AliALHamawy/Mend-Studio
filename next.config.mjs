@@ -3,6 +3,11 @@ import { fileURLToPath } from 'node:url';
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   typedRoutes: true,
+  // Output file tracing walks up from the project looking for a lockfile to infer the workspace
+  // root. A stray package-lock.json in the parent folder (C:\Users\DELL) is picked up that way and
+  // rejected for being outside the Git repository, which prints a warning on every build. Pinning
+  // the root to this directory skips the search and keeps tracing scoped to the project.
+  outputFileTracingRoot: fileURLToPath(new URL('.', import.meta.url)),
   // The FFmpeg WASM packages construct their worker with `new URL(<dynamic>, import.meta.url)`,
   // which Turbopack tries to resolve at build time and fails on. Both `dev` and `build` therefore
   // run on webpack (see package.json scripts), so no `turbopack` options are configured here.

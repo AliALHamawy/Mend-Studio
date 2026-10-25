@@ -10,6 +10,7 @@ import { DragDropZone } from "@/components/converter/drag-drop-zone";
 import { FormatSelector } from "@/components/converter/format-selector";
 import { ConversionStatus } from "@/components/converter/conversion-status";
 import { QualityControl } from "@/components/converter/quality-control";
+import { takePendingFile } from "@/lib/pending-file";
 
 const formatSize = (bytes: number) =>
     bytes < 1024 ? `${bytes} B` : `${(bytes / 1024 / 1024).toFixed(2)} MB`;
@@ -22,10 +23,14 @@ const formatSize = (bytes: number) =>
 const MAX_INPUT_MB = 50;
 const MAX_INPUT_BYTES = MAX_INPUT_MB * 1024 * 1024;
 
-export function MediaConverter({ kind, title, description, formats }: { kind: "audio" | "video"; title: string; description: string; formats: string[] }) {
+/**
+ * `defaultTarget` pre-selects an output for the output routes (`/convert/audio/to-wav`). It only
+ * changes which chip starts active, and falls back to the first format on the plain workspace route.
+ */
+export function MediaConverter({ kind, title, description, formats, defaultTarget }: { kind: "audio" | "video"; title: string; description: string; formats: string[]; defaultTarget?: string }) {
     const accent: "crimson" | "emerald" = kind === "audio" ? "crimson" : "emerald";
     const [file, setFile] = useState<File | null>(null);
-    const [target, setTarget] = useState(formats[0]);
+    const [target, setTarget] = useState(defaultTarget ?? formats[0]);
     const [quality, setQuality] = useState(kind === "audio" ? 192 : 2);
     const [working, setWorking] = useState(false);
     const [stage, setStage] = useState("Converting your file…");
@@ -36,6 +41,17 @@ export function MediaConverter({ kind, title, description, formats }: { kind: "a
     useEffect(() => () => {
         if (download?.url) URL.revokeObjectURL(download.url);
     }, [download]);
+
+    /**
+     * A file dropped on the homepage hero arrives through `lib/pending-file`, because a `File` cannot
+     * travel in a URL. It is claimed once, so returning to this page does not reload a stale selection.
+     */
+    useEffect(() => {
+        const pending = takePendingFile(kind);
+        if (!pending) return;
+        if (pending.size > MAX_INPUT_BYTES) { setError(FILE_TOO_LARGE_MESSAGE); return; }
+        setFile(pending);
+    }, [kind]);
 
     function revokeDownload() {
         if (download?.url) URL.revokeObjectURL(download.url);

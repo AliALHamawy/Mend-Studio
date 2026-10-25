@@ -1,5 +1,6 @@
 import { LazyMediaConverter } from "@/components/shared/media-converter-lazy";
+import { workspaceTargets } from "@/lib/conversion-pairs";
 
-export function VideoConverter() {
-  return <LazyMediaConverter kind="video" title="Video workbench" description="Move between MP4, WebM, MKV, MOV, and AVI with FFmpeg." formats={["mp4", "webm", "mkv", "mov", "avi"]} />;
+export function VideoConverter({ defaultTarget }: { defaultTarget?: string } = {}) {
+  return <LazyMediaConverter kind="video" title="Video workbench" description="Move between MP4, WebM, MKV, MOV, and AVI with FFmpeg." formats={workspaceTargets("video")} defaultTarget={defaultTarget} />;
 }

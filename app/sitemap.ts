@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { absoluteUrl } from "@/lib/page-metadata";
+import { listConversionTargets, targetPath, WORKSPACE_SLUGS } from "@/lib/conversion-pairs";
 
 const publicRoutes: Array<{
   path: "/" | `/${string}`;
@@ -14,10 +15,19 @@ const publicRoutes: Array<{
   { path: "/terms", changeFrequency: "monthly", priority: 0.5 },
 ];
 
+/** The output pages are the ones most likely to match a "convert to x" search, so they are listed too. */
+const outputRoutes: typeof publicRoutes = WORKSPACE_SLUGS.flatMap((workspace) =>
+  listConversionTargets(workspace).map((target) => ({
+    path: targetPath(target),
+    changeFrequency: "weekly",
+    priority: 0.7,
+  })),
+);
+
 export default function sitemap(): MetadataRoute.Sitemap {
   const lastModified = new Date();
 
-  return publicRoutes.map(({ path, changeFrequency, priority }) => ({
+  return [...publicRoutes, ...outputRoutes].map(({ path, changeFrequency, priority }) => ({
     url: absoluteUrl(path),
     lastModified,
     changeFrequency,

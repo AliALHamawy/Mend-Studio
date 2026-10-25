@@ -10,20 +10,22 @@ import { DragDropZone } from "@/components/converter/drag-drop-zone";
 import { ConversionStatus } from "@/components/converter/conversion-status";
 import { FormatSelector } from "@/components/converter/format-selector";
 import { QualityControl } from "@/components/converter/quality-control";
+import { workspaceFormats } from "@/lib/conversion-pairs";
+import { takePendingFile } from "@/lib/pending-file";
 
 type ImageFormat = "image/jpeg" | "image/png" | "image/webp" | "image/avif";
-const formats = [
-  { label: "JPG", value: "image/jpeg", extension: "jpg" },
-  { label: "PNG", value: "image/png", extension: "png" },
-  { label: "WEBP", value: "image/webp", extension: "webp" },
-  { label: "AVIF", value: "image/avif", extension: "avif" }
-] as const;
+/** Chip order, labels and extensions come from the shared table so output routes cannot drift from it. */
+const formats = workspaceFormats("image");
 
 const size = (bytes: number) => bytes < 1024 ? `${bytes} B` : `${(bytes / 1024 / 1024).toFixed(2)} MB`;
 
-export function ImageConverter() {
+/**
+ * `defaultTarget` pre-selects an output for the output routes (`/convert/image/to-webp`). It only
+ * changes which chip starts active, and falls back to WebP on the plain workspace route.
+ */
+export function ImageConverter({ defaultTarget }: { defaultTarget?: string } = {}) {
   const [file, setFile] = useState<File | null>(null);
-  const [target, setTarget] = useState<ImageFormat>("image/webp");
+  const [target, setTarget] = useState<ImageFormat>((defaultTarget as ImageFormat | undefined) ?? "image/webp");
   const [quality, setQuality] = useState(0.86);
   const [preview, setPreview] = useState("");
   const [output, setOutput] = useState<{ url: string; bytes: number; name: string } | null>(null);
@@ -38,6 +40,18 @@ export function ImageConverter() {
   }, [file]);
 
   useEffect(() => () => { if (output) URL.revokeObjectURL(output.url); }, [output]);
+
+  /**
+   * A file dropped on the homepage hero arrives through `lib/pending-file`, because a `File` cannot
+   * travel in a URL. It is claimed once, so returning to this page does not reload a stale selection.
+   */
+  useEffect(() => {
+    const pending = takePendingFile("image");
+    if (!pending) return;
+    if (!pending.type.startsWith("image/")) { setError(INVALID_FILE_MESSAGE); return; }
+    if (pending.size > 50 * 1024 * 1024) { setError("Images must be 50 MB or smaller."); return; }
+    setFile(pending);
+  }, []);
 
   function acceptFile(next?: File) {
     if (!next) return;
@@ -72,8 +86,8 @@ export function ImageConverter() {
       bitmap.close();
       const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, target, target === "image/png" ? undefined : quality));
       if (!blob) throw new Error("This browser could not create that image format.");
-      const format = formats.find((item) => item.value === target);
-      const name = `${file.name.replace(/\.[^/.]+$/, "")}.${format?.extension ?? "converted"}`;
+      const format = formats.find((item) => item.target === target);
+      const name = `${file.name.replace(/\.[^/.]+$/, "")}.${format?.token ?? "converted"}`;
       const url = URL.createObjectURL(blob);
       setOutput({ url, bytes: blob.size, name });
       const link = document.createElement("a");
@@ -119,7 +133,7 @@ export function ImageConverter() {
             </div>
             <div className="grid gap-6 rounded-2xl border border-white/90 bg-white/35 p-4 shadow-[inset_0_1px_2px_rgba(255,255,255,1)] ring-1 ring-inset ring-white/80 backdrop-blur-3xl sm:p-5">
               <label className="flex flex-col gap-2 text-sm font-medium text-zinc-700"><span>Convert to</span>
-                <FormatSelector value={target} formats={formats.map((format) => format.value)} labels={formats.map((format) => format.label)} accent="amber" onChange={(value) => setTarget(value as ImageFormat)} />
+                <FormatSelector value={target} formats={formats.map((format) => format.target)} labels={formats.map((format) => format.label)} accent="amber" onChange={(value) => setTarget(value as ImageFormat)} />
               </label>
               <QualityControl label="Smart compression" value={quality} min={0.1} max={1} step={0.01} valueLabel={`${Math.round(quality * 100)}%`} hint="Higher quality keeps more detail and creates a larger file." accent="amber" onChange={setQuality} />
             </div>
