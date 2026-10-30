@@ -2,8 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { ArrowRightIcon, DownloadIcon, LoaderCircleIcon } from "lucide-react";
-import { CONVERSION_FAILED_MESSAGE, FILE_TOO_LARGE_MESSAGE } from "@/lib/conversion-messages";
-import { convertMediaLocally, MediaConversionError } from "@/lib/ffmpeg-client";
+import {
+  CONVERSION_FAILED_MESSAGE,
+  FILE_TOO_LARGE_MESSAGE,
+  SERVER_UNREACHABLE_MESSAGE,
+  SERVER_CONVERSION_FAILED_MESSAGE,
+  SERVER_CONVERSION_TIMEOUT_MESSAGE,
+} from "@/lib/conversion-messages";
+import { convertMediaViaServer, ServerConversionError } from "@/lib/api-converter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { DragDropZone } from "@/components/converter/drag-drop-zone";
@@ -60,14 +66,18 @@ export function MediaConverter({ kind, title, description, formats, defaultTarge
     async function convert() {
         if (!file) return;
         setWorking(true);
-        setStage("Starting the in-browser FFmpeg engine…");
+        setStage("Uploading your file for conversion…");
         setProgress(null);
         setError("");
         revokeDownload();
         setDownload(null);
         try {
-            const { blob, filename } = await convertMediaLocally(file, target, quality, (percent) => {
-                setStage("Converting in your browser…");
+            const { blob, filename } = await convertMediaViaServer(file, target, (percent) => {
+                if (percent === 0) {
+                    setStage("Uploading your file for conversion…");
+                } else {
+                    setStage("Conversion complete — downloading…");
+                }
                 setProgress(percent);
             });
             const url = URL.createObjectURL(blob);
@@ -77,9 +87,25 @@ export function MediaConverter({ kind, title, description, formats, defaultTarge
             link.download = filename;
             link.click();
         } catch (conversionError) {
-            // Wasm/FFmpeg details stay in the console; the badge only shows a friendly message.
-            console.error("[convert] local conversion failed", conversionError);
-            setError(conversionError instanceof MediaConversionError ? conversionError.message : CONVERSION_FAILED_MESSAGE);
+            // Server details stay in the console; the badge only shows a friendly message.
+            console.error("[convert] server conversion failed", conversionError);
+            if (conversionError instanceof ServerConversionError) {
+                switch (conversionError.kind) {
+                    case "network":
+                        setError(SERVER_UNREACHABLE_MESSAGE);
+                        break;
+                    case "timeout":
+                        setError(SERVER_CONVERSION_TIMEOUT_MESSAGE);
+                        break;
+                    case "server":
+                        setError(conversionError.message || SERVER_CONVERSION_FAILED_MESSAGE);
+                        break;
+                    default:
+                        setError(SERVER_CONVERSION_FAILED_MESSAGE);
+                }
+            } else {
+                setError(CONVERSION_FAILED_MESSAGE);
+            }
         } finally {
             setProgress(null);
             setWorking(false);
@@ -114,7 +140,7 @@ export function MediaConverter({ kind, title, description, formats, defaultTarge
                 <DragDropZone accept={`${kind}/*`} onFile={acceptFile} accent={accent}>
                     <div className="text-center">
                         <strong className="block text-sm text-foreground">{file?.name ?? `Drop a ${kind} file here`}</strong>
-                        <p className="mt-2 text-xs text-muted-foreground">Up to {MAX_INPUT_MB} MB · converted locally in your browser</p>
+                        <p className="mt-2 text-xs text-muted-foreground">Up to {MAX_INPUT_MB} MB · converted on the server</p>
                     </div>
                 </DragDropZone>
                 <div className="flex flex-col gap-4">
